@@ -2,17 +2,21 @@ import { cn } from "@/lib/utils";
 import { Event } from "@/schema/event";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
+  addMonths,
   format,
   fromUnixTime,
   getDate,
   getDaysInMonth,
   getUnixTime,
   isSameDay,
+  isToday,
   setDate,
   setHours,
   setMinutes,
   setSeconds,
+  subMonths,
 } from "date-fns";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { ReactNode, useDeferredValue, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -27,10 +31,6 @@ import {
   FormMessage,
 } from "./ui/form";
 import { Input } from "./ui/input";
-
-type CalendarProps = {
-  date: Date;
-};
 
 function getLength(daysInMonth: number): number {
   const daysInWeek = 7;
@@ -55,9 +55,10 @@ const FormSchema = Event.pick({ type: true }).extend({
 
 type FormSchema = z.infer<typeof FormSchema>;
 
-export default function Calendar(props: CalendarProps): ReactNode {
+export default function Calendar(): ReactNode {
+  const [currentDate, setCurrentDate] = useState(() => new Date());
   const [events, setEvents] = useState<Event[]>([]);
-  const daysInMonth = getDaysInMonth(props.date);
+  const daysInMonth = getDaysInMonth(currentDate);
   const [selectedDay, setSelectedDay] = useState<number>();
   const deferredSelectedDay = useDeferredValue(selectedDay);
   const form = useForm<FormSchema>({
@@ -67,42 +68,8 @@ export default function Calendar(props: CalendarProps): ReactNode {
     },
   });
 
-  function getCell(_: unknown, i: number): ReactNode {
-    const day = i + 1;
-    const isDayOfMonth = day <= daysInMonth;
-    const date = setDate(props.date, day);
-    // TODO: check kung same day or hindi yung from at to
-    // assume muna na same day lang
-
-    const eventsToday = events.filter((v) =>
-      isSameDay(date, fromUnixTime(v.from)),
-    );
-
-    return (
-      <Button
-        variant="ghost"
-        className={cn(
-          "rounded-none w-full h-28 border-l border-b relative",
-          day === getDate(props.date) && "bg-sky-200",
-        )}
-        key={i}
-        onClick={isDayOfMonth ? () => setSelectedDay(day) : undefined}
-      >
-        <span className="absolute top-1 left-1">{isDayOfMonth ? day : ""}</span>
-        <div className="flex flex-col">
-          {eventsToday.map((event, i) => (
-            <span key={i} className="rounded bg-sky-300 my-1 p-1">
-              {format(fromUnixTime(event.from), "p")} -{" "}
-              {format(fromUnixTime(event.to), "p")}
-            </span>
-          ))}
-        </div>
-      </Button>
-    );
-  }
-
   const day = selectedDay ?? deferredSelectedDay;
-  const date = day ? setDate(props.date, day) : undefined;
+  const date = day ? setDate(currentDate, day) : undefined;
 
   function handleSubmit(values: FormSchema) {
     if (date) {
@@ -126,6 +93,53 @@ export default function Calendar(props: CalendarProps): ReactNode {
       // TODO: sort
       setEvents((prev) => [...prev, event]);
     }
+  }
+
+  function nextMonth() {
+    setCurrentDate((prev) => addMonths(prev, 1));
+  }
+
+  function prevMonth() {
+    setCurrentDate((prev) => subMonths(prev, 1));
+  }
+
+  function getCell(_: unknown, i: number): ReactNode {
+    const day = i + 1;
+    const isDayOfMonth = day <= daysInMonth;
+    const date = setDate(currentDate, day);
+    // TODO: check kung same day or hindi yung from at to
+    // assume muna na same day lang
+    //
+    // TODO: check kung nag ooverlap sa existing events yung from at to
+
+    const eventsToday = events.filter((v) =>
+      isSameDay(date, fromUnixTime(v.from)),
+    );
+
+    return (
+      <Button
+        variant="ghost"
+        className={cn(
+          "rounded-none w-full h-28 border-l border-b relative",
+          day === getDate(currentDate) && isToday(currentDate) && "bg-sky-200",
+          day === getDate(currentDate) &&
+            !isToday(currentDate) &&
+            "bg-gray-200",
+        )}
+        key={i}
+        onClick={isDayOfMonth ? () => setSelectedDay(day) : undefined}
+      >
+        <span className="absolute top-1 left-1">{isDayOfMonth ? day : ""}</span>
+        <div className="flex flex-col">
+          {eventsToday.map((event, i) => (
+            <span key={i} className="rounded bg-sky-300 my-1 p-1">
+              {format(fromUnixTime(event.from), "p")} -{" "}
+              {format(fromUnixTime(event.to), "p")}
+            </span>
+          ))}
+        </div>
+      </Button>
+    );
   }
 
   return (
@@ -174,6 +188,17 @@ export default function Calendar(props: CalendarProps): ReactNode {
           </Form>
         </DialogContent>
       </Dialog>
+      <div className="flex justify-center gap-2">
+        <Button variant="ghost" size="icon" onClick={prevMonth}>
+          <ChevronLeft className="h-4 w-4" />
+        </Button>
+        <h1 className="scroll-m-20 text-2xl font-bold tracking-tight">
+          {format(currentDate, "MMMM yyyy")}
+        </h1>
+        <Button variant="ghost" size="icon" onClick={nextMonth}>
+          <ChevronRight className="h-4 w-4" />
+        </Button>
+      </div>
       <div className="grid grid-cols-7 mt-10 mx-10 border-t border-r">
         {Array.from({ length: getLength(daysInMonth) }, getCell)}
       </div>

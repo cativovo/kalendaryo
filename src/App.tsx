@@ -1,7 +1,7 @@
 import Calendar from "@/components/calendar";
 
 function App() {
-  return <Calendar date={new Date()} />;
+  return <Calendar />;
 }
 
 export default App;
