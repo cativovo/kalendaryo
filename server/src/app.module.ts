@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { CalendarEventsModule } from './calendar-events/calendar-events.module';
 import config from './config';
 
 @Module({
@@ -9,8 +8,7 @@ import config from './config';
     ConfigModule.forRoot({
       load: [config],
     }),
+    CalendarEventsModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}
