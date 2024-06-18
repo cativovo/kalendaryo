@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { Event } from "@/schema/event";
+import { CalendarEvent } from "@/schema/event";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   addMonths,
@@ -31,6 +31,8 @@ import {
   FormMessage,
 } from "./ui/form";
 import { Input } from "./ui/input";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { CreateEventPayload, createEvent, findAllEvents } from "@/api/calendar";
 
 function getLength(daysInMonth: number): number {
   const daysInWeek = 7;
@@ -48,16 +50,28 @@ function toTime(str: string): [number, number] {
   return [parseInt(arr[0]), parseInt(arr[1])];
 }
 
-const FormSchema = Event.pick({ type: true }).extend({
+const FormSchema = CalendarEvent.pick({ type: true }).extend({
   from: z.string(),
   to: z.string(),
 });
 
 type FormSchema = z.infer<typeof FormSchema>;
 
+const findAllQueryKey = "find-all-events";
 export default function Calendar(): ReactNode {
+  const queryClient = useQueryClient();
+  const query = useQuery({
+    queryKey: [findAllQueryKey],
+    queryFn: findAllEvents,
+  });
+  const mutation = useMutation({
+    mutationKey: ["create-calendar-event"],
+    mutationFn: createEvent,
+    onSuccess() {
+      queryClient.invalidateQueries({ queryKey: [findAllQueryKey] });
+    },
+  });
   const [currentDate, setCurrentDate] = useState(() => new Date());
-  const [events, setEvents] = useState<Event[]>([]);
   const daysInMonth = getDaysInMonth(currentDate);
   const [selectedDay, setSelectedDay] = useState<number>();
   const deferredSelectedDay = useDeferredValue(selectedDay);
@@ -70,6 +84,7 @@ export default function Calendar(): ReactNode {
 
   const day = selectedDay ?? deferredSelectedDay;
   const date = day ? setDate(currentDate, day) : undefined;
+  const events = query.data ?? [];
 
   function handleSubmit(values: FormSchema) {
     if (date) {
@@ -83,15 +98,12 @@ export default function Calendar(): ReactNode {
       let toDate = setHours(date, toHours);
       toDate = setMinutes(toDate, toMinutes);
       toDate = setSeconds(toDate, 0);
-
-      const event: Event = {
+      const payload: CreateEventPayload = {
         from: getUnixTime(fromDate),
         to: getUnixTime(toDate),
         type: values.type,
       };
-
-      // TODO: sort
-      setEvents((prev) => [...prev, event]);
+      mutation.mutate(payload);
     }
   }
 
@@ -140,6 +152,10 @@ export default function Calendar(): ReactNode {
         </div>
       </Button>
     );
+  }
+
+  if (query.isPending) {
+    return <p>loading...</p>;
   }
 
   return (

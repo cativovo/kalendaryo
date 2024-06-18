@@ -2,10 +2,11 @@ import { z } from "zod";
 
 export const eventTypes = ["shift", "availability"] as const;
 
-export const Event = z.object({
+export const CalendarEvent = z.object({
+  id: z.string(),
   type: z.enum(eventTypes),
   from: z.number(),
   to: z.number(),
 });
 
-export type Event = z.infer<typeof Event>;
+export type CalendarEvent = z.infer<typeof CalendarEvent>;
