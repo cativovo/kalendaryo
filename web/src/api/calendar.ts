@@ -1,10 +1,5 @@
-import ky from "ky";
 import { CalendarEvent } from "@/schema/event";
-
-const api = ky.create({ prefixUrl: import.meta.env.VITE_BFF_URL });
-enum ApiPath {
-  CalendarEvents = "calendar-events",
-}
+import { ApiPath, api } from "./client";
 
 export type CreateEventPayload = Omit<CalendarEvent, "id">;
 export async function createEvent(
