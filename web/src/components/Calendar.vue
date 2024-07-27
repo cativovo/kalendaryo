@@ -25,20 +25,14 @@ const rows = computed<Cell[][]>(() => {
   const daysInPreviousMonth = getDaysInMonth(subMonths(currentDate.value, 1));
 
   let rows = Math.ceil((startIndex + daysInMonth) / DAYS_IN_A_WEEK);
-  const cells: Cell[] = new Array(DAYS_IN_A_WEEK * rows).fill({
-    currentMonth: false,
-    value: 0,
-  });
-
   let day = 1;
   let isCurrentMonth = true;
-  for (let i = 0; i < cells.length; i++) {
+  const cells = Array.from({ length: DAYS_IN_A_WEEK * rows }, (_, i) => {
     if (i < startIndex) {
-      cells[i] = {
+      return {
         isCurrentMonth: false,
         value: daysInPreviousMonth - startIndex + i + 1,
       };
-      continue;
     }
 
     if (day > daysInMonth) {
@@ -46,22 +40,20 @@ const rows = computed<Cell[][]>(() => {
       isCurrentMonth = false;
     }
 
-    cells[i] = {
+    const cell = {
       value: day,
       isCurrentMonth,
     };
-    day++;
-  }
 
-  const result: Cell[][] = [];
-  const max = cells.length / DAYS_IN_A_WEEK;
-  for (let i = 0; i < max; i++) {
+    day++;
+    return cell;
+  });
+
+  return Array.from({ length: cells.length / DAYS_IN_A_WEEK }, (_, i) => {
     const start = i * DAYS_IN_A_WEEK;
     const end = start + DAYS_IN_A_WEEK;
-    result.push(cells.slice(start, end));
-  }
-
-  return result;
+    return cells.slice(start, end);
+  });
 });
 </script>
 
