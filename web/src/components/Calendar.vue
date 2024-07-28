@@ -2,27 +2,81 @@
 import {
   addMonths,
   format,
+  formatDate,
   getDay,
   getDaysInMonth,
+  setMonth,
   startOfMonth,
   subMonths,
 } from "date-fns";
 import { computed, ref } from "vue";
+import { useAddEventListener } from "../hooks/useAddEventListener";
 
 type Cell = {
   isCurrentMonth: boolean;
   value: number;
 };
 
+const MONTHS = [
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
+];
+
 const DAYS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
 const DAYS_IN_A_WEEK = 7;
-const currentDate = ref(new Date());
+const YEAR_FORMAT = "yyyy";
+const MONTH_FORMAT = "MMMM";
+
+const currentDate = new Date();
+const currentMonthString = formatDate(currentDate, MONTH_FORMAT);
+const range = 20;
+const currentYearInt = parseInt(formatDate(currentDate, YEAR_FORMAT));
+const years = Array.from({ length: 40 }, (_, i) => {
+  return currentYearInt + i - range;
+});
+
+const selectedDate = ref(currentDate);
+const isMonthPopoverOpen = ref(false);
+const monthPopoverRef = ref<HTMLDivElement | null>(null);
+const monthPopoverAnchorRef = ref<HTMLElement | null>(null);
+
+useAddEventListener({
+  event: "keyup",
+  listener(e) {
+    if (e.code === "Escape") {
+      isMonthPopoverOpen.value = false;
+    }
+  },
+});
+
+useAddEventListener({
+  event: "click",
+  listener(e) {
+    if (
+      e.target &&
+      !monthPopoverRef.value?.contains(e.target as Node) &&
+      !monthPopoverAnchorRef.value?.contains(e.target as Node)
+    ) {
+      isMonthPopoverOpen.value = false;
+    }
+  },
+});
 
 const rows = computed<Cell[][]>(() => {
-  const firstDayOfMonth = startOfMonth(currentDate.value);
+  const firstDayOfMonth = startOfMonth(selectedDate.value);
   const startIndex = getDay(firstDayOfMonth);
-  const daysInMonth = getDaysInMonth(currentDate.value);
-  const daysInPreviousMonth = getDaysInMonth(subMonths(currentDate.value, 1));
+  const daysInMonth = getDaysInMonth(selectedDate.value);
+  const daysInPreviousMonth = getDaysInMonth(subMonths(selectedDate.value, 1));
 
   let rows = Math.ceil((startIndex + daysInMonth) / DAYS_IN_A_WEEK);
   let day = 1;
@@ -55,19 +109,62 @@ const rows = computed<Cell[][]>(() => {
     return cells.slice(start, end);
   });
 });
+
+const selectedMonthString = computed(() =>
+  formatDate(selectedDate.value, MONTH_FORMAT),
+);
+
+const selectedYearString = computed(() =>
+  formatDate(selectedDate.value, YEAR_FORMAT),
+);
+
+function updateMonth(month: string) {
+  selectedDate.value = setMonth(selectedDate.value, MONTHS.indexOf(month));
+  isMonthPopoverOpen.value = false;
+}
 </script>
 
 <template>
-  <h1 class="text-center">{{ format(currentDate, "MMMM yyyy") }}</h1>
+  <div class="text-center">
+    <div class="relative">
+      <button
+        @click="isMonthPopoverOpen = !isMonthPopoverOpen"
+        ref="monthPopoverAnchorRef"
+        data-testid="month-popover-btn"
+      >
+        {{ selectedMonthString }}
+      </button>
+      <Transition>
+        <div
+          v-if="isMonthPopoverOpen"
+          class="grid absolute right-1/2 grid-cols-3 gap-2 p-2 bg-white border translate-x-1/2"
+          ref="monthPopoverRef"
+          data-testid="month-popover"
+        >
+          <button
+            v-for="month in MONTHS"
+            :key="month"
+            @click="updateMonth(month)"
+            class="py-1 transition-colors hover:bg-gray-100"
+            :class="currentMonthString === month && 'bg-gray-300'"
+          >
+            {{ month }}
+          </button>
+        </div>
+      </Transition>
+      &nbsp;
+      <span data-testid="year-select">{{ selectedYearString }}</span>
+    </div>
+  </div>
   <div class="flex gap-4 justify-center">
     <button
-      @click="currentDate = subMonths(currentDate, 1)"
+      @click="selectedDate = subMonths(selectedDate, 1)"
       data-testid="prev-month-btn"
     >
       <
     </button>
     <button
-      @click="currentDate = addMonths(currentDate, 1)"
+      @click="selectedDate = addMonths(selectedDate, 1)"
       data-testid="next-month-btn"
     >
       >
@@ -97,3 +194,15 @@ const rows = computed<Cell[][]>(() => {
     </table>
   </div>
 </template>
+
+<style scoped>
+.v-enter-active,
+.v-leave-active {
+  @apply transition-opacity;
+}
+
+.v-enter-from,
+.v-leave-to {
+  @apply opacity-0;
+}
+</style>
