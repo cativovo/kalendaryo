@@ -3,12 +3,8 @@ import { useAddEventListener } from "./useAddEventListener";
 import { mount } from "@vue/test-utils";
 
 test("Add and remove event listener", () => {
-  const mockAddEventListener = vi.fn();
-  const mockRemoveEventListener = vi.fn();
-  const mockDocument = document;
-  mockDocument.addEventListener = mockAddEventListener;
-  mockDocument.removeEventListener = mockRemoveEventListener;
-  vi.stubGlobal("document", mockDocument);
+  const addEventListenerSpy = vi.spyOn(document, "addEventListener");
+  const removeEventListenerSpy = vi.spyOn(document, "addEventListener");
 
   const TestComponent = defineComponent({
     setup() {
@@ -21,8 +17,8 @@ test("Add and remove event listener", () => {
   });
 
   const wrapper = mount(TestComponent);
-  expect(mockAddEventListener).toHaveBeenCalledOnce();
+  expect(addEventListenerSpy).toHaveBeenCalledOnce();
 
   wrapper.unmount();
-  expect(mockAddEventListener).toHaveBeenCalledOnce();
+  expect(removeEventListenerSpy).toHaveBeenCalledOnce();
 });
