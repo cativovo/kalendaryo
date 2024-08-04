@@ -11,6 +11,7 @@ import {
 } from "date-fns";
 import { computed, ref } from "vue";
 import { useAddEventListeners } from "../hooks/useAddEventListeners";
+import Dropdown from "./Dropdown.vue";
 
 type Cell = {
   isCurrentMonth: boolean;
@@ -42,7 +43,7 @@ const currentMonthString = formatDate(currentDate, MONTH_FORMAT);
 const range = 20;
 const currentYearInt = parseInt(formatDate(currentDate, YEAR_FORMAT));
 const years = Array.from({ length: 40 }, (_, i) => {
-  return currentYearInt + i - range;
+  return (currentYearInt + i - range).toString();
 });
 
 const selectedDate = ref(currentDate);
@@ -148,9 +149,9 @@ function updateMonth(month: string) {
             </button>
           </div>
         </Transition>
-        &nbsp;
-        <span data-testid="year-select">{{ selectedYearString }}</span>
       </div>
+      <span data-testid="year-select">{{ selectedYearString }}</span>
+      <Dropdown :options="years" :selected="selectedYearString" />
     </div>
     <div class="flex gap-4 justify-center">
       <button
