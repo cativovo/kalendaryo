@@ -10,7 +10,7 @@ import {
   subMonths,
 } from "date-fns";
 import { computed, ref } from "vue";
-import { useAddEventListener } from "../hooks/useAddEventListener";
+import { useAddEventListeners } from "../hooks/useAddEventListeners";
 
 type Cell = {
   isCurrentMonth: boolean;
@@ -50,18 +50,13 @@ const isMonthPopoverOpen = ref(false);
 const monthPopoverRef = ref<HTMLDivElement | null>(null);
 const monthPopoverAnchorRef = ref<HTMLElement | null>(null);
 
-useAddEventListener({
-  event: "keyup",
-  listener(e) {
+useAddEventListeners({
+  keyup(e) {
     if (e.code === "Escape") {
       isMonthPopoverOpen.value = false;
     }
   },
-});
-
-useAddEventListener({
-  event: "click",
-  listener(e) {
+  click(e) {
     if (
       e.target &&
       !monthPopoverRef.value?.contains(e.target as Node) &&
