@@ -120,73 +120,75 @@ function updateMonth(month: string) {
 </script>
 
 <template>
-  <div class="text-center">
-    <div class="relative">
-      <button
-        @click="isMonthPopoverOpen = !isMonthPopoverOpen"
-        ref="monthPopoverAnchorRef"
-        data-testid="month-popover-btn"
-      >
-        {{ selectedMonthString }}
-      </button>
-      <Transition>
-        <div
-          v-if="isMonthPopoverOpen"
-          class="grid absolute right-1/2 grid-cols-3 gap-2 p-2 bg-white border translate-x-1/2"
-          ref="monthPopoverRef"
-          data-testid="month-popover"
+  <div>
+    <div class="text-center">
+      <div class="relative">
+        <button
+          @click="isMonthPopoverOpen = !isMonthPopoverOpen"
+          ref="monthPopoverAnchorRef"
+          data-testid="month-popover-btn"
         >
-          <button
-            v-for="month in MONTHS"
-            :key="month"
-            @click="updateMonth(month)"
-            class="py-1 transition-colors hover:bg-gray-100"
-            :class="currentMonthString === month && 'bg-gray-300'"
+          {{ selectedMonthString }}
+        </button>
+        <Transition>
+          <div
+            v-if="isMonthPopoverOpen"
+            class="grid absolute right-1/2 grid-cols-3 gap-2 p-2 bg-white border translate-x-1/2"
+            ref="monthPopoverRef"
+            data-testid="month-popover"
           >
-            {{ month }}
-          </button>
-        </div>
-      </Transition>
-      &nbsp;
-      <span data-testid="year-select">{{ selectedYearString }}</span>
+            <button
+              v-for="month in MONTHS"
+              :key="month"
+              @click="updateMonth(month)"
+              class="py-1 transition-colors hover:bg-gray-100"
+              :class="currentMonthString === month && 'bg-gray-300'"
+            >
+              {{ month }}
+            </button>
+          </div>
+        </Transition>
+        &nbsp;
+        <span data-testid="year-select">{{ selectedYearString }}</span>
+      </div>
     </div>
-  </div>
-  <div class="flex gap-4 justify-center">
-    <button
-      @click="selectedDate = subMonths(selectedDate, 1)"
-      data-testid="prev-month-btn"
-    >
-      <
-    </button>
-    <button
-      @click="selectedDate = addMonths(selectedDate, 1)"
-      data-testid="next-month-btn"
-    >
+    <div class="flex gap-4 justify-center">
+      <button
+        @click="selectedDate = subMonths(selectedDate, 1)"
+        data-testid="prev-month-btn"
       >
-    </button>
-  </div>
-  <div class="mx-auto max-w-lg">
-    <table class="mt-8 w-full border border-collapse">
-      <thead>
-        <tr>
-          <th v-for="day in DAYS" :key="day" class="text-center border">
-            {{ day }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-for="(row, i) in rows" :key="i">
-          <td
-            v-for="(cell, j) in row"
-            :key="j"
-            class="text-center border"
-            :class="!cell.isCurrentMonth && 'text-gray-400'"
-          >
-            {{ cell.value }}
-          </td>
-        </tr>
-      </tbody>
-    </table>
+        <
+      </button>
+      <button
+        @click="selectedDate = addMonths(selectedDate, 1)"
+        data-testid="next-month-btn"
+      >
+        >
+      </button>
+    </div>
+    <div class="mx-auto max-w-lg">
+      <table class="mt-8 w-full border border-collapse">
+        <thead>
+          <tr>
+            <th v-for="day in DAYS" :key="day" class="text-center border">
+              {{ day }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="(row, i) in rows" :key="i">
+            <td
+              v-for="(cell, j) in row"
+              :key="j"
+              class="text-center border"
+              :class="!cell.isCurrentMonth && 'text-gray-400'"
+            >
+              {{ cell.value }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </template>
 
