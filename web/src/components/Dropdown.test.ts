@@ -70,10 +70,17 @@ test("Can select option", async () => {
   // nth-child() starts at 1
   await wrapper.get("ul > li:nth-child(7) > button").trigger("click");
 
+  expect(wrapper.get('[data-testid="selected"]').text()).toBe("6");
+
   const selectEvent = wrapper.emitted("select")!;
   expect(selectEvent).toHaveLength(1);
   expect(selectEvent[0]).toEqual([6]);
   expect(wrapper.find("ul").exists()).toBe(false);
+
+  await wrapper.get("input").trigger("click");
+  expect(
+    wrapper.get("ul > li:nth-child(7)").attributes("data-testid"),
+  ).toContain("option-selected");
 });
 
 test("Focus changes with default select", async () => {
@@ -204,4 +211,21 @@ test("Can search", async () => {
   await wrapper.get("input").setValue("no option");
   expect(wrapper.findAll("ul > li")).toHaveLength(1);
   expect(wrapper.get("ul > li:nth-child(1)").text()).toBe("No options");
+});
+
+test("Can clear input", async () => {
+  const wrapper = mount(Dropdown, {
+    props: {
+      options,
+    },
+  });
+
+  await wrapper.get("input").trigger("click");
+  await wrapper.get("input").setValue("test");
+  expect(wrapper.get("input").element.value).toBe("test");
+  expect(wrapper.findAll("ul > li")).toHaveLength(1);
+
+  await wrapper.get("input + button").trigger("click");
+  expect(wrapper.get("input").element.value).toBe("");
+  expect(wrapper.findAll("ul > li")).toHaveLength(10);
 });
