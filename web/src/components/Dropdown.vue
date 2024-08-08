@@ -6,7 +6,13 @@ type Props = {
   options: T[];
   selected?: T;
 };
+
+type Emits = {
+  select: [v: T];
+};
+
 const props = defineProps<Props>();
+const emit = defineEmits<Emits>();
 
 const selectedRef = ref<Element | null>(null);
 const anchorRef = ref<HTMLDivElement | null>(null);
@@ -18,8 +24,6 @@ const selected = ref(props.selected);
 const query = ref<string>("");
 const activeOptionIndex = ref<number>(0);
 
-// TODO: emit onselect event
-
 function openDropdown() {
   isDropdownOpen.value = true;
 }
@@ -30,6 +34,7 @@ function closeDropdown() {
 
 function select(option: T) {
   selected.value = option;
+  emit("select", option);
   closeDropdown();
 }
 
