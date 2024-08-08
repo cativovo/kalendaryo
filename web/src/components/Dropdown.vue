@@ -1,6 +1,5 @@
 <script setup lang="ts" generic="T extends string | number">
 import { computed, ref, watch } from "vue";
-import { useAddEventListeners } from "../hooks/useAddEventListeners";
 
 type Props = {
   options: T[];
@@ -83,13 +82,6 @@ const filteredOptions = computed(() =>
   props.options.filter((v) => v.toString().includes(query.value)),
 );
 
-useAddEventListeners({
-  click(e) {
-    if (e.target && !anchorRef.value?.contains(e.target as Node)) {
-      closeDropdown();
-    }
-  },
-});
 
 watch(selectedRef, () => {
   if (isDropdownOpen.value && !query.value) {
