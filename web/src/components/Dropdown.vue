@@ -78,10 +78,22 @@ function handleKeydown(e: KeyboardEvent) {
   }
 }
 
+function setOptionTestId(option: T, i: number) {
+  const testIds = [
+    selected.value === option && "option-selected",
+    activeOptionIndex.value === i && "option-active",
+  ].filter(Boolean);
+
+  if (testIds.length === 0) {
+    return undefined;
+  }
+
+  return testIds.join(" ");
+}
+
 const filteredOptions = computed(() =>
   props.options.filter((v) => v.toString().includes(query.value)),
 );
-
 
 watch(selectedRef, () => {
   if (isDropdownOpen.value && !query.value) {
@@ -112,11 +124,15 @@ watch(
 </script>
 
 <template>
-  <div data-testid="dropdown" class="inline-block relative" ref="anchorRef">
+  <div class="inline-block relative" ref="anchorRef">
     <div class="inline-block relative border cursor-pointer">
-      <span class="absolute py-1 px-2" v-if="!query" @click="openDropdown()">{{
-        selected
-      }}</span>
+      <span
+        data-testid="selected"
+        class="absolute py-1 px-2"
+        v-if="!query"
+        @click="openDropdown()"
+        >{{ selected }}</span
+      >
       <input
         type="text"
         class="py-1 px-2 w-full outline-none"
@@ -142,7 +158,9 @@ watch(
       ref="listRef"
     >
       <li
+        v-if="filteredOptions.length > 0"
         v-for="(option, i) in filteredOptions"
+        :data-testid="setOptionTestId(option, i)"
         :key="`${option}-${i}`"
         :ref="
           (el) => {
@@ -166,6 +184,7 @@ watch(
           {{ option }}
         </button>
       </li>
+      <li v-else>No options</li>
     </ul>
   </div>
 </template>
