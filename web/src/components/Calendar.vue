@@ -6,6 +6,7 @@ import {
   getDay,
   getDaysInMonth,
   setMonth,
+  setYear,
   startOfMonth,
   subMonths,
 } from "date-fns";
@@ -43,7 +44,7 @@ const currentMonthString = formatDate(currentDate, MONTH_FORMAT);
 const range = 20;
 const currentYearInt = parseInt(formatDate(currentDate, YEAR_FORMAT));
 const years = Array.from({ length: 40 }, (_, i) => {
-  return (currentYearInt + i - range).toString();
+  return currentYearInt + i - range;
 });
 
 const selectedDate = ref(currentDate);
@@ -106,17 +107,21 @@ const rows = computed<Cell[][]>(() => {
   });
 });
 
-const selectedMonthString = computed(() =>
+const selectedMonth = computed(() =>
   formatDate(selectedDate.value, MONTH_FORMAT),
 );
 
-const selectedYearString = computed(() =>
-  formatDate(selectedDate.value, YEAR_FORMAT),
+const selectedYear = computed(() =>
+  parseInt(formatDate(selectedDate.value, YEAR_FORMAT)),
 );
 
 function updateMonth(month: string) {
   selectedDate.value = setMonth(selectedDate.value, MONTHS.indexOf(month));
   isMonthPopoverOpen.value = false;
+}
+
+function updateYear(year: number) {
+  selectedDate.value = setYear(selectedDate.value, year);
 }
 </script>
 
@@ -129,7 +134,7 @@ function updateMonth(month: string) {
           ref="monthPopoverAnchorRef"
           data-testid="month-popover-btn"
         >
-          {{ selectedMonthString }}
+          {{ selectedMonth }}
         </button>
         <Transition>
           <div
@@ -150,8 +155,12 @@ function updateMonth(month: string) {
           </div>
         </Transition>
       </div>
-      <span data-testid="year-select">{{ selectedYearString }}</span>
-      <Dropdown :options="years" :selected="selectedYearString" />
+      <span data-testid="year-select">{{ selectedYear }}</span>
+      <Dropdown
+        :options="years"
+        :selected="selectedYear"
+        @select="updateYear"
+      />
     </div>
     <div class="flex gap-4 justify-center">
       <button
