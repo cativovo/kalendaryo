@@ -79,6 +79,14 @@ function handleKeydown(e: KeyboardEvent) {
   }
 }
 
+function setSelectedRef(option: T) {
+  return (ref: Element): undefined => {
+    if (option === selected.value) {
+      selectedRef.value = ref;
+    }
+  };
+}
+
 function setOptionTestId(option: T, i: number) {
   const testIds = [
     selected.value === option && "option-selected",
@@ -170,13 +178,7 @@ watch(
         v-for="(option, i) in filteredOptions"
         :data-testid="setOptionTestId(option, i)"
         :key="`${option}-${i}`"
-        :ref="
-          (el) => {
-            if (option === selected) {
-              selectedRef = el as HTMLButtonElement;
-            }
-          }
-        "
+        :ref="setSelectedRef(option)"
       >
         <!-- preventDefault on mousedown to make sure the input above don't lose focus -->
         <button
