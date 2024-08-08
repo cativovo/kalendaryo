@@ -1,5 +1,6 @@
 <script setup lang="ts" generic="T extends string | number">
 import { computed, ref, watch } from "vue";
+import { ChevronDown } from "lucide-vue-next";
 
 type Props = {
   options: T[];
@@ -145,11 +146,18 @@ watch(
       />
       <button
         v-if="query"
-        class="absolute right-2 top-1/2 -translate-y-1/2"
+        class="absolute right-8 top-1/2 -translate-y-1/2"
         @mousedown="$event.preventDefault()"
         @click="query = ''"
       >
         &times;
+      </button>
+      <button
+        @mousedown="$event.preventDefault()"
+        class="absolute right-2 top-1/2 -translate-y-1/2"
+        @click="openDropdown()"
+      >
+        <ChevronDown class="text-gray-300" />
       </button>
     </div>
     <ul
@@ -173,8 +181,8 @@ watch(
         <!-- preventDefault on mousedown to make sure the input above don't lose focus -->
         <button
           :class="[
-            selected === option && 'bg-red-500',
-            activeOptionIndex === i && selected !== option && 'bg-blue-200',
+            selected === option && 'bg-blue-200',
+            activeOptionIndex === i && selected !== option && 'bg-gray-100',
             'w-full text-left p-1',
           ]"
           @click="select(option)"
