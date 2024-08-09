@@ -8,7 +8,7 @@ type Props = {
 };
 
 type Emits = {
-  select: [v: T];
+  select: [T];
 };
 
 const props = defineProps<Props>();

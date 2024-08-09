@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import {
   addMonths,
-  format,
   formatDate,
   getDay,
   getDaysInMonth,
@@ -11,8 +10,8 @@ import {
   subMonths,
 } from "date-fns";
 import { computed, ref } from "vue";
-import { useAddEventListeners } from "../hooks/useAddEventListeners";
 import Dropdown from "./Dropdown.vue";
+import Popover from "./Popover.vue";
 
 type Cell = {
   isCurrentMonth: boolean;
@@ -48,26 +47,6 @@ const years = Array.from({ length: 40 }, (_, i) => {
 });
 
 const selectedDate = ref(currentDate);
-const isMonthPopoverOpen = ref(false);
-const monthPopoverRef = ref<HTMLDivElement | null>(null);
-const monthPopoverAnchorRef = ref<HTMLElement | null>(null);
-
-useAddEventListeners({
-  keyup(e) {
-    if (e.code === "Escape") {
-      isMonthPopoverOpen.value = false;
-    }
-  },
-  click(e) {
-    if (
-      e.target &&
-      !monthPopoverRef.value?.contains(e.target as Node) &&
-      !monthPopoverAnchorRef.value?.contains(e.target as Node)
-    ) {
-      isMonthPopoverOpen.value = false;
-    }
-  },
-});
 
 const rows = computed<Cell[][]>(() => {
   const firstDayOfMonth = startOfMonth(selectedDate.value);
@@ -117,7 +96,6 @@ const selectedYear = computed(() =>
 
 function updateMonth(month: string) {
   selectedDate.value = setMonth(selectedDate.value, MONTHS.indexOf(month));
-  isMonthPopoverOpen.value = false;
 }
 
 function updateYear(year: number) {
@@ -128,38 +106,18 @@ function updateYear(year: number) {
 <template>
   <div>
     <div class="text-center">
-      <div class="relative">
-        <button
-          @click="isMonthPopoverOpen = !isMonthPopoverOpen"
-          ref="monthPopoverAnchorRef"
-          data-testid="month-popover-btn"
-        >
-          {{ selectedMonth }}
-        </button>
-        <Transition>
-          <div
-            v-if="isMonthPopoverOpen"
-            class="grid absolute right-1/2 grid-cols-3 gap-2 p-2 bg-white border translate-x-1/2"
-            ref="monthPopoverRef"
-            data-testid="month-popover"
-          >
-            <button
-              v-for="month in MONTHS"
-              :key="month"
-              @click="updateMonth(month)"
-              class="py-1 transition-colors hover:bg-gray-100"
-              :class="currentMonthString === month && 'bg-gray-300'"
-            >
-              {{ month }}
-            </button>
-          </div>
-        </Transition>
-      </div>
-      <span data-testid="year-select">{{ selectedYear }}</span>
+      <Popover
+        data-testid="month-popover"
+        :label="selectedMonth"
+        :selected="selectedMonth"
+        :options="MONTHS"
+        @select="updateMonth"
+      />
       <Dropdown
         :options="years"
         :selected="selectedYear"
         @select="updateYear"
+        data-testid="year-select"
       />
     </div>
     <div class="flex gap-4 justify-center">
