@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="T extends string | number">
-import { computed, ref, watch } from "vue";
+import { computed, ref, Transition, watch } from "vue";
 import { ChevronDown } from "lucide-vue-next";
 
 type Props = {
@@ -168,34 +168,36 @@ watch(
         <ChevronDown class="text-gray-300" />
       </button>
     </div>
-    <ul
-      class="overflow-y-scroll absolute right-0 left-0 py-1 max-h-36 bg-white border divide-y"
-      v-if="isDropdownOpen"
-      ref="listRef"
-    >
-      <li
-        v-if="filteredOptions.length > 0"
-        v-for="(option, i) in filteredOptions"
-        :data-testid="setOptionTestId(option, i)"
-        :key="`${option}-${i}`"
-        :ref="setSelectedRef(option)"
+    <Transition name="fade">
+      <ul
+        class="overflow-y-scroll absolute right-0 left-0 py-1 max-h-36 bg-white border divide-y"
+        v-if="isDropdownOpen"
+        ref="listRef"
       >
-        <!-- preventDefault on mousedown to make sure the input above don't lose focus -->
-        <button
-          :class="[
-            selected === option && 'bg-blue-200',
-            activeOptionIndex === i && selected !== option && 'bg-gray-100',
-            'w-full text-left p-1',
-          ]"
-          @click="select(option)"
-          @mousedown="$event.preventDefault()"
-          @mouseover="activeOptionIndex = i"
+        <li
+          v-if="filteredOptions.length > 0"
+          v-for="(option, i) in filteredOptions"
+          :data-testid="setOptionTestId(option, i)"
+          :key="`${option}-${i}`"
+          :ref="setSelectedRef(option)"
         >
-          {{ option }}
-        </button>
-      </li>
-      <li v-else>No options</li>
-    </ul>
+          <!-- preventDefault on mousedown to make sure the input above don't lose focus -->
+          <button
+            :class="[
+              selected === option && 'bg-blue-200',
+              activeOptionIndex === i && selected !== option && 'bg-gray-100',
+              'w-full text-left p-1',
+            ]"
+            @click="select(option)"
+            @mousedown="$event.preventDefault()"
+            @mouseover="activeOptionIndex = i"
+          >
+            {{ option }}
+          </button>
+        </li>
+        <li v-else>No options</li>
+      </ul>
+    </Transition>
   </div>
 </template>
 

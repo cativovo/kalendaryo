@@ -159,15 +159,3 @@ function updateYear(year: number) {
     </div>
   </div>
 </template>
-
-<style scoped>
-.v-enter-active,
-.v-leave-active {
-  @apply transition-opacity;
-}
-
-.v-enter-from,
-.v-leave-to {
-  @apply opacity-0;
-}
-</style>

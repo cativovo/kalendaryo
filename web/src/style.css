@@ -1,3 +1,14 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* for <Transition name="fade" /> */
+.fade-enter-from,
+.fade-leave-to {
+  @apply opacity-0;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  @apply transition-opacity;
+}

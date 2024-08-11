@@ -55,7 +55,7 @@ useAddEventListeners({
       >
         {{ props.label }}
       </button>
-      <Transition>
+      <Transition name="fade">
         <div
           v-if="isPopoverOpen"
           class="grid absolute right-1/2 z-50 grid-cols-[repeat(3,1fr)] gap-2 p-2 bg-white border translate-x-1/2"
