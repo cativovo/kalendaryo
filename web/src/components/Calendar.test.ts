@@ -128,141 +128,101 @@ test("Calendar is rendering next month properly", async () => {
   }
 });
 
-test.todo("do some cleanup");
+test("Month popover is rendering properly", async () => {
+  const date = new Date(2024, 6); // July 2024
+  vi.setSystemTime(date);
 
-// test("Month popover is rendering properly", async () => {
-//   const date = new Date(2024, 6); // July 2024
-//   vi.setSystemTime(date);
-//
-//   const wrapper = mount(Calendar);
-//   const months = [
-//     "January",
-//     "February",
-//     "March",
-//     "April",
-//     "May",
-//     "June",
-//     "July",
-//     "August",
-//     "September",
-//     "October",
-//     "November",
-//     "December",
-//   ];
-//
-//   expect(wrapper.find('[data-testid="month-popover"]').exists()).toBe(false);
-//
-//   await wrapper.get('[data-testid="month-popover-btn"]').trigger("click");
-//
-//   const buttons = wrapper
-//     .get('[data-testid="month-popover"]')
-//     .findAll("button");
-//   expect(buttons).toHaveLength(12);
-//   const currentMonthIndex = 6;
-//   const currentMonthClasses = buttons[currentMonthIndex].classes();
-//   for (let i = 0; i < buttons.length; i++) {
-//     expect(buttons[i].text()).toBe(months[i]);
-//
-//     if (i !== currentMonthIndex) {
-//       expect(buttons[i].classes()).not.toStrictEqual(currentMonthClasses);
-//     }
-//   }
-//
-//   await wrapper.get('[data-testid="month-popover-btn"]').trigger("click");
-//   expect(wrapper.find('[data-testid="month-popover"]').exists()).toBe(false);
-// });
+  const wrapper = mount(Calendar);
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
 
-// test("Select month", async () => {
-//   const date = new Date(2024, 6); // July 2024
-//   vi.setSystemTime(date);
-//
-//   const wrapper = mount(Calendar);
-//
-//   // Select January
-//   await wrapper.get('[data-testid="month-popover-btn"]').trigger("click");
-//   let buttons = wrapper.get('[data-testid="month-popover"]').findAll("button");
-//
-//   await buttons[0].trigger("click");
-//
-//   expect(wrapper.find('[data-testid="month-popover"]').exists()).toBe(false);
-//
-//   expect(wrapper.get('[data-testid="month-popover-btn"]').text()).toBe(
-//     "January",
-//   );
-//
-//   let table = wrapper.get("table");
-//   let tbody = table.get("tbody");
-//   let tds = tbody.findAll("td");
-//
-//   expect(tds).toHaveLength(35);
-//
-//   const daysInJanuary2024: string[] = [
-//     "31",
-//     ...Array.from({ length: 31 }, (_, i) => (i + 1).toString()), // 1-31
-//     "1",
-//     "2",
-//     "3",
-//   ];
-//
-//   for (const i in daysInJanuary2024) {
-//     expect(tds[i].text()).toBe(daysInJanuary2024[i]);
-//   }
-//
-//   // Select December
-//   await wrapper.get('[data-testid="month-popover-btn"]').trigger("click");
-//   buttons = wrapper.get('[data-testid="month-popover"]').findAll("button");
-//
-//   await buttons[11].trigger("click");
-//   expect(wrapper.find('[data-testid="month-popover"]').exists()).toBe(false);
-//
-//   expect(wrapper.get('[data-testid="month-popover-btn"]').text()).toBe(
-//     "December",
-//   );
-//
-//   table = wrapper.get("table");
-//   tbody = table.get("tbody");
-//   tds = tbody.findAll("td");
-//
-//   expect(tds).toHaveLength(35);
-//
-//   const daysInDecember2024: string[] = [
-//     ...Array.from({ length: 31 }, (_, i) => (i + 1).toString()), // 1-31
-//     "1",
-//     "2",
-//     "3",
-//     "4",
-//   ];
-//
-//   for (const i in daysInDecember2024) {
-//     expect(tds[i].text()).toBe(daysInDecember2024[i]);
-//   }
-// });
+  await wrapper.get('[data-testid="popover-btn"]').trigger("click");
 
-// test("Closing month popover by clicking outside of it", async () => {
-//   const wrapper = mount(Calendar, { attachTo: document.body });
-//
-//   await wrapper.get('[data-testid="month-popover-btn"]').trigger("click");
-//   wrapper.get('[data-testid="month-popover"]');
-//
-//   // click inside
-//   await wrapper.get('[data-testid="month-popover"]').trigger("click");
-//   wrapper.get('[data-testid="month-popover"]');
-//
-//   // click outside
-//   await wrapper.trigger("click");
-//   expect(wrapper.find('[data-testid="month-popover"]').exists()).toBe(false);
-//
-//   wrapper.unmount();
-// });
+  const buttons = wrapper.findAll('[data-testid="popover"] > button');
+  expect(buttons).toHaveLength(12);
+  expect(buttons.map((button) => button.text())).toEqual(months);
+});
 
-// test("Closing month popover by pressing Esc", async () => {
-//   const wrapper = mount(Calendar, { attachTo: document.body });
-//
-//   await wrapper.get('[data-testid="month-popover-btn"]').trigger("click");
-//   wrapper.get('[data-testid="month-popover"]');
-//
-//   await wrapper.trigger("keyup", { code: "Escape" });
-//   expect(wrapper.find('[data-testid="month-popover"]').exists()).toBe(false);
-//
-//   wrapper.unmount();
-// });
+test("Select month", async () => {
+  const date = new Date(2024, 6); // July 2024
+  vi.setSystemTime(date);
+
+  const wrapper = mount(Calendar);
+
+  expect(
+    wrapper
+      .get('[data-testid="month-popover"] [data-testid="popover-btn"]')
+      .text(),
+  ).toBe("July");
+
+  // Select January
+  await wrapper
+    .get('[data-testid="month-popover"] [data-testid="popover-btn"]')
+    .trigger("click");
+  await wrapper
+    .get('[data-testid="popover"] > button:nth-child(1)')
+    .trigger("click");
+  expect(
+    wrapper
+      .get('[data-testid="month-popover"] [data-testid="popover-btn"]')
+      .text(),
+  ).toBe("January");
+
+  let tds = wrapper.findAll("table > tbody td");
+
+  expect(tds).toHaveLength(35);
+
+  const daysInJanuary2024: string[] = [
+    "31",
+    ...Array.from({ length: 31 }, (_, i) => (i + 1).toString()), // 1-31
+    "1",
+    "2",
+    "3",
+  ];
+
+  for (const i in daysInJanuary2024) {
+    expect(tds[i].text()).toBe(daysInJanuary2024[i]);
+  }
+
+  // Select December
+  await wrapper
+    .get('[data-testid="month-popover"] [data-testid="popover-btn"]')
+    .trigger("click");
+  await wrapper
+    .get('[data-testid="popover"] > button:nth-child(12)')
+    .trigger("click");
+
+  expect(
+    wrapper
+      .get('[data-testid="month-popover"] [data-testid="popover-btn"]')
+      .text(),
+  ).toBe("December");
+
+  tds = wrapper.findAll("table > tbody td");
+
+  expect(tds).toHaveLength(35);
+
+  const daysInDecember2024: string[] = [
+    ...Array.from({ length: 31 }, (_, i) => (i + 1).toString()), // 1-31
+    "1",
+    "2",
+    "3",
+    "4",
+  ];
+
+  for (const i in daysInDecember2024) {
+    expect(tds[i].text()).toBe(daysInDecember2024[i]);
+  }
+});
