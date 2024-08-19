@@ -12,6 +12,7 @@ import {
 import { computed, ref } from "vue";
 import Dropdown from "./Dropdown.vue";
 import Popover from "./Popover.vue";
+import { ChevronLeft, ChevronRight } from "lucide-vue-next";
 
 type Cell = {
   isCurrentMonth: boolean;
@@ -39,7 +40,6 @@ const YEAR_FORMAT = "yyyy";
 const MONTH_FORMAT = "MMMM";
 
 const currentDate = new Date();
-const currentMonthString = formatDate(currentDate, MONTH_FORMAT);
 const range = 20;
 const currentYearInt = parseInt(formatDate(currentDate, YEAR_FORMAT));
 const years = Array.from({ length: 40 }, (_, i) => {
@@ -104,8 +104,15 @@ function updateYear(year: number) {
 </script>
 
 <template>
-  <div>
-    <div class="text-center">
+  <div class="mt-4">
+    <div class="flex gap-2 justify-center">
+      <button
+        @click="selectedDate = subMonths(selectedDate, 1)"
+        data-testid="prev-month-btn"
+        class="text-gray-400 transition-colors hover:text-gray-300"
+      >
+        <ChevronLeft />
+      </button>
       <Popover
         data-testid="month-popover"
         :label="selectedMonth"
@@ -117,25 +124,19 @@ function updateYear(year: number) {
         :options="years"
         :selected="selectedYear"
         @select="updateYear"
+        class="w-28"
         data-testid="year-select"
       />
-    </div>
-    <div class="flex gap-4 justify-center">
-      <button
-        @click="selectedDate = subMonths(selectedDate, 1)"
-        data-testid="prev-month-btn"
-      >
-        <
-      </button>
       <button
         @click="selectedDate = addMonths(selectedDate, 1)"
         data-testid="next-month-btn"
+        class="text-gray-400 transition-colors hover:text-gray-300"
       >
-        >
+        <ChevronRight />
       </button>
     </div>
-    <div class="mx-auto max-w-lg">
-      <table class="mt-8 w-full border border-collapse">
+    <div class="mx-auto mt-6 max-w-lg">
+      <table class="w-full border border-collapse">
         <thead>
           <tr>
             <th v-for="day in DAYS" :key="day" class="text-center border">
