@@ -86,3 +86,38 @@ test("Can select option", async () => {
     }
   });
 });
+
+test("Can change selected using props", async () => {
+  const props = {
+    label: "popover",
+    selected: 0,
+    options,
+  };
+  const wrapper = mount(Popover, {
+    props,
+  });
+
+  await wrapper.get('[data-testid="popover-btn"]').trigger("click");
+
+  wrapper.findAll('[data-testid="popover"] > button').forEach((button, i) => {
+    if (i === 0) {
+      expect(button.attributes("data-testid")).toBe("option-selected");
+    } else {
+      expect(button.attributes("data-testid")).toBe(undefined);
+    }
+  });
+
+  await wrapper.get('[data-testid="popover-btn"]').trigger("click");
+
+  wrapper.setProps({ ...props, selected: 9 });
+
+  await wrapper.get('[data-testid="popover-btn"]').trigger("click");
+
+  wrapper.findAll('[data-testid="popover"] > button').forEach((button, i) => {
+    if (i === 9) {
+      expect(button.attributes("data-testid")).toBe("option-selected");
+    } else {
+      expect(button.attributes("data-testid")).toBe(undefined);
+    }
+  });
+});

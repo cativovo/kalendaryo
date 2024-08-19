@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="T extends number | string">
-import { ref } from "vue";
+import { ref, watchEffect } from "vue";
 import { useAddEventListeners } from "../hooks/useAddEventListeners";
 
 type Props = {
@@ -25,6 +25,10 @@ function select(option: T) {
   selected.value = option;
   isPopoverOpen.value = false;
 }
+
+watchEffect(() => {
+  selected.value = props.selected;
+});
 
 useAddEventListeners({
   keydown(e) {
