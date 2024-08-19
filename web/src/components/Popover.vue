@@ -52,10 +52,11 @@ useAddEventListeners({
   <div>
     <div class="inline-block relative">
       <button
-        @click="isPopoverOpen = !isPopoverOpen"
+        class="py-1 px-2 transition-colors hover:bg-gray-100"
         ref="popoverAnchorRef"
         data-testid="popover-btn"
         @blur="isPopoverOpen = false"
+        @click="isPopoverOpen = !isPopoverOpen"
       >
         {{ props.label }}
       </button>
