@@ -140,11 +140,12 @@ watch(
         class="absolute py-1 px-2"
         v-if="!query"
         @click="openDropdown()"
-        >{{ selected }}</span
       >
+        {{ selected }}
+      </span>
       <input
         type="text"
-        class="py-1 px-2 w-full outline-none"
+        class="py-1 pr-11 pl-2 w-full outline-none"
         v-model="query"
         ref="inputRef"
         @click="openDropdown()"
