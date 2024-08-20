@@ -41,7 +41,11 @@ watchEffect(() => {
       class="relative p-4 rounded-md"
       data-testid="dialog"
     >
-      <button @click="onClose" class="absolute top-1 right-1 p-1 text-gray-400">
+      <button
+        @click="onClose"
+        class="absolute top-1 right-1 p-1 text-gray-400"
+        data-testid="dialog-close-button"
+      >
         <X />
       </button>
       <slot />
