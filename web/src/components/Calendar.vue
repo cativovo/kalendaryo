@@ -4,19 +4,32 @@ import {
   formatDate,
   getDay,
   getDaysInMonth,
+  isToday,
+  setDate,
   setMonth,
   setYear,
   startOfMonth,
   subMonths,
 } from "date-fns";
+import { ChevronLeft, ChevronRight } from "lucide-vue-next";
 import { computed, ref } from "vue";
 import Dropdown from "./Dropdown.vue";
 import Popover from "./Popover.vue";
-import { ChevronLeft, ChevronRight } from "lucide-vue-next";
+
+type Emits = {
+  select: [Date];
+};
+
+enum MonthPosition {
+  Prev = -1,
+  Current = 0,
+  Next = 1,
+}
 
 type Cell = {
-  isCurrentMonth: boolean;
-  value: number;
+  monthPosition: MonthPosition;
+  isToday: boolean;
+  day: number;
 };
 
 const MONTHS = [
@@ -40,12 +53,13 @@ const YEAR_FORMAT = "yyyy";
 const MONTH_FORMAT = "MMMM";
 
 const currentDate = new Date();
-const range = 20;
+const yearRange = 40;
 const currentYearInt = parseInt(formatDate(currentDate, YEAR_FORMAT));
-const years = Array.from({ length: 40 }, (_, i) => {
-  return currentYearInt + i - range;
+const years = Array.from({ length: yearRange }, (_, i) => {
+  return currentYearInt + i - yearRange / 2;
 });
 
+const emit = defineEmits<Emits>();
 const selectedDate = ref(currentDate);
 
 const rows = computed<Cell[][]>(() => {
@@ -55,24 +69,26 @@ const rows = computed<Cell[][]>(() => {
   const daysInPreviousMonth = getDaysInMonth(subMonths(selectedDate.value, 1));
 
   let rows = Math.ceil((startIndex + daysInMonth) / DAYS_IN_A_WEEK);
+  let monthPosition = MonthPosition.Current;
   let day = 1;
-  let isCurrentMonth = true;
   const cells = Array.from({ length: DAYS_IN_A_WEEK * rows }, (_, i) => {
     if (i < startIndex) {
       return {
-        isCurrentMonth: false,
-        value: daysInPreviousMonth - startIndex + i + 1,
+        day: daysInPreviousMonth - startIndex + i + 1,
+        isToday: false,
+        monthPosition: MonthPosition.Prev,
       };
     }
 
     if (day > daysInMonth) {
       day = 1;
-      isCurrentMonth = false;
+      monthPosition = MonthPosition.Next;
     }
 
     const cell = {
-      value: day,
-      isCurrentMonth,
+      day,
+      isToday: isToday(setDate(selectedDate.value, day)),
+      monthPosition,
     };
 
     day++;
@@ -100,6 +116,11 @@ function updateMonth(month: string) {
 
 function updateYear(year: number) {
   selectedDate.value = setYear(selectedDate.value, year);
+}
+
+function selectDate(day: number, monthPosition: MonthPosition) {
+  const date = addMonths(setDate(selectedDate.value, day), monthPosition);
+  emit("select", date);
 }
 </script>
 
@@ -150,9 +171,20 @@ function updateYear(year: number) {
               v-for="(cell, j) in row"
               :key="j"
               class="text-center border"
-              :class="!cell.isCurrentMonth && 'text-gray-400'"
+              :class="{
+                'bg-blue-200': cell.isToday,
+                'text-gray-200': cell.monthPosition !== MonthPosition.Current,
+              }"
+              :data-testid="
+                cell.isToday ? `current-day day-${cell.day}` : `day-${cell.day}`
+              "
             >
-              {{ cell.value }}
+              <button
+                class="inline-block w-full h-full"
+                @click="selectDate(cell.day, cell.monthPosition)"
+              >
+                {{ cell.day }}
+              </button>
             </td>
           </tr>
         </tbody>

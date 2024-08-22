@@ -12,7 +12,7 @@ afterEach(() => {
 });
 
 test("Calendar is rendering properly", () => {
-  const date = new Date(2024, 6); // July 2024
+  const date = new Date(2024, 6, 16); // July 16, 2024
   vi.setSystemTime(date);
 
   const wrapper = mount(Calendar);
@@ -50,6 +50,12 @@ test("Calendar is rendering properly", () => {
   ];
 
   for (const i in daysInCalendar) {
+    if (tds[i].text() === "16") {
+      expect(tds[i].attributes("data-testid")).contains("current-day");
+    } else {
+      expect(tds[i].attributes("data-testid")).toMatch(/day-\d+/);
+    }
+
     expect(tds[i].text()).toBe(daysInCalendar[i]);
   }
 });
@@ -225,4 +231,53 @@ test("Select month", async () => {
   for (const i in daysInDecember2024) {
     expect(tds[i].text()).toBe(daysInDecember2024[i]);
   }
+});
+
+test("Emits selected date within current month", async () => {
+  const date = new Date(2024, 6); // July 2024
+  vi.setSystemTime(date);
+
+  const wrapper = mount(Calendar);
+
+  const days = wrapper.findAll("[data-testid*=day-] > button");
+
+  const selectedDate = days.find((v) => v.text() === "16");
+  await selectedDate?.trigger("click");
+
+  const selectEvent = wrapper.emitted("select")!;
+
+  expect(selectEvent).toHaveLength(1);
+  expect(selectEvent[0]).toEqual([new Date(2024, 6, 16)]);
+});
+
+test("Emits selected date from previous month", async () => {
+  const date = new Date(2024, 6); // July 2024
+  vi.setSystemTime(date);
+
+  const wrapper = mount(Calendar);
+
+  const days = wrapper.findAll("[data-testid*=day-] > button");
+
+  await days[0].trigger("click"); // click June 30, 2024
+
+  const selectEvent = wrapper.emitted("select")!;
+
+  expect(selectEvent).toHaveLength(1);
+  expect(selectEvent[0]).toEqual([new Date(2024, 5, 30)]);
+});
+
+test("Emits selected date from next month", async () => {
+  const date = new Date(2024, 6); // July 2024
+  vi.setSystemTime(date);
+
+  const wrapper = mount(Calendar);
+
+  const days = wrapper.findAll("[data-testid*=day-] > button");
+
+  await days[34].trigger("click"); // click August 03, 2024
+
+  const selectEvent = wrapper.emitted("select")!;
+
+  expect(selectEvent).toHaveLength(1);
+  expect(selectEvent[0]).toEqual([new Date(2024, 7, 3)]);
 });
