@@ -1,6 +1,5 @@
 import { mount } from "@vue/test-utils";
 import Modal from "./Modal.vue";
-import { nextTick } from "vue";
 
 test("Modal is rendering properly", async () => {
   const container = document.createElement("div");
@@ -17,8 +16,6 @@ test("Modal is rendering properly", async () => {
     attachTo: container,
   });
 
-  await nextTick();
-
   expect(container.innerHTML).not.contains(defaultSlot);
   expect(document.body.children).toHaveLength(2);
   expect(document.body.children[1].innerHTML).toContain(defaultSlot);
@@ -27,8 +24,7 @@ test("Modal is rendering properly", async () => {
     document.body.querySelector('[data-testid="dialog"]')?.hasAttribute("open"),
   ).toBe(false);
 
-  wrapper.setProps({ visible: true });
-  await nextTick();
+  await wrapper.setProps({ visible: true });
 
   expect(
     document.body.querySelector('[data-testid="dialog"]')?.hasAttribute("open"),
@@ -38,28 +34,47 @@ test("Modal is rendering properly", async () => {
 });
 
 test("Emits close event when close button is clicked", async () => {
-  const container = document.createElement("div");
-  document.body.appendChild(container);
-  const defaultSlot = "<div>eyyyyy</div>";
-
   const wrapper = mount(Modal, {
     props: {
       visible: true,
     },
     slots: {
-      default: defaultSlot,
+      default: "<div>eyyyyy</div>",
     },
-    attachTo: container,
+    global: {
+      stubs: {
+        teleport: true,
+      },
+    },
   });
 
-  document
-    .querySelector<HTMLButtonElement>('[data-testid="dialog-close-button"]')
-    ?.click();
+  await wrapper
+    .get<HTMLButtonElement>('[data-testid="dialog-close-button"]')
+    .trigger("click");
 
   const event = wrapper.emitted("close")!;
   expect(event).toHaveLength(1);
-
-  wrapper.unmount();
 });
 
-test.todo("Emits close event when Escape key is pressed");
+test("Emits close event when <dialog> is closed", async () => {
+  const wrapper = mount(Modal, {
+    props: {
+      visible: true,
+    },
+    slots: {
+      default: "<div>eyyyyy</div>",
+    },
+    global: {
+      stubs: {
+        teleport: true,
+      },
+    },
+  });
+
+  await wrapper
+    .get<HTMLDialogElement>('[data-testid="dialog"]')
+    .trigger("close");
+
+  const event = wrapper.emitted("close")!;
+  expect(event).toHaveLength(1);
+});
