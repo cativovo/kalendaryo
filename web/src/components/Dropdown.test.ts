@@ -83,6 +83,22 @@ test("Can select option", async () => {
   ).toContain("option-selected");
 });
 
+test("Update selected when prop.selected change", async () => {
+  const wrapper = mount(Dropdown, {
+    props: {
+      options,
+      selected: 5,
+    },
+  });
+
+  await wrapper.get("input").trigger("click");
+  expect(wrapper.get('[data-testid="selected"]').text()).toBe("5");
+
+  await wrapper.setProps({ selected: 7 });
+  await wrapper.get("input").trigger("click");
+  expect(wrapper.get('[data-testid="selected"]').text()).toBe("7");
+});
+
 test("Focus changes with default select", async () => {
   const selected = 5;
   const wrapper = mount(Dropdown, {

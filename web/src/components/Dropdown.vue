@@ -1,5 +1,5 @@
 <script setup lang="ts" generic="T extends string | number">
-import { computed, ref, Transition, watch } from "vue";
+import { computed, ref, Transition, watch, watchEffect } from "vue";
 import { ChevronDown } from "lucide-vue-next";
 
 type Props = {
@@ -103,6 +103,10 @@ function setOptionTestId(option: T, i: number) {
 const filteredOptions = computed(() =>
   props.options.filter((v) => v.toString().includes(query.value)),
 );
+
+watchEffect(() => {
+  selected.value = props.selected;
+});
 
 watch(selectedRef, () => {
   if (isDropdownOpen.value && !query.value) {
